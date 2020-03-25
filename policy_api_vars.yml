@@ -371,7 +371,7 @@
                 "transport_zone_path":"/infra/sites/default/enforcement-points/default/transport-zones/{{tzs.results[0].id}}",
                 "subnets":[  
                   {  
-                    "gateway_address":"172.16.10.5/24"
+                    "gateway_address":"1.1.1.1/31"
                   }
                 ]
               }
@@ -386,7 +386,7 @@
                 "transport_zone_path":"/infra/sites/default/enforcement-points/default/transport-zones/{{tzs.results[0].id}}",
                 "subnets":[  
                   {  
-                    "gateway_address":"172.16.20.5/24"
+                    "gateway_address":"1.1.1.3/31"
                   }
                 ]
               }
@@ -401,7 +401,7 @@
                 "transport_zone_path":"/infra/sites/default/enforcement-points/default/transport-zones/{{tzs.results[0].id}}",
                 "subnets":[  
                   {  
-                    "gateway_address":"172.16.30.5/24"
+                    "gateway_address":"1.1.1.5/31"
                   }
                 ]
               }
