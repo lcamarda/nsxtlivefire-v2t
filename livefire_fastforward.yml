@@ -62,6 +62,7 @@
         transport_type: "{{ item.transport_type }}"
         host_switch_name: "{{ item.host_switch_name }}"
         uplink_teaming_policy_names: "{{item.uplink_teaming_policy_names}}"
+        nested_nsx: "{{item.nested_nsx}}"
         state: "{{ state }}"
       with_items:
         - "{{ transport_zones }}"

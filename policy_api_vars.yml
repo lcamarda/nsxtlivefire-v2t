@@ -349,9 +349,8 @@
           "description":"tenant-1 gateway",
           "display_name":"t1-tenant1",
           "failover_mode":"NON_PREEMPTIVE",
-          "tier0_path":"/infra/tier-0s/t0-sitea",
+          "tier0_path":"/infra/tier-0s/t0-gateway",
           "route_advertisement_types":[  
-            "TIER1_CONNECTED"
           ],
           "children":[  
             {  
@@ -414,7 +413,7 @@
         "resource_type":"ChildTier0",
         "marked_for_delete":false,
         "Tier0":{  
-          "id":"t0-sitea",
+          "id":"t0-gateway",
           "resource_type":"Tier0",
           "ha_mode":"ACTIVE_STANDBY",
           "failover_mode":"NON_PREEMPTIVE",

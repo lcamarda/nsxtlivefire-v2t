@@ -44,13 +44,15 @@
       "transport_type": "OVERLAY",
       "host_switch_name": "nvds",
       "uplink_teaming_policy_names": [],
+      "nested_nsx": true
     },
     {
       "display_name": "VLAN-EDGE-TZ",
       "description": "NSX Configured VLAN Transport Zone for Edge Nodes at Site A",
       "transport_type": "VLAN",
       "host_switch_name": "nvds",
-      "uplink_teaming_policy_names": [ "uplink-1-only" , "uplink-2-only" ]
+      "uplink_teaming_policy_names": [ "uplink-1-only" , "uplink-2-only" ],
+      "nested_nsx": false
     }   
   ],
 
