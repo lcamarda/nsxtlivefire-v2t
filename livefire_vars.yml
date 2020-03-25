@@ -1,0 +1,425 @@
+{
+
+  #
+  # Flag to create or delete all the objects
+  # Accepts: 'present' to create; 'absent' to delete
+  #
+  "state": "present",
+
+  #
+  # Common NSX Appliance variables
+  #
+  "nsx_username": "admin",
+  "nsx_password": "VMware1!VMware1!",
+  "validate_certs": False,
+
+  #
+  # First NSX appliance node. Defined separate based on the consumption.
+  # Accepts both IP (IPv4) and FQDN for 'mgmt_ip'
+  #
+  "nsx_node": {
+    "hostname": "nsxmgr-01b.corp.local",
+    "mgmt_ip": "192.168.210.15",
+  },
+
+
+
+  "compute_managers": [
+    {
+      "display_name": "vcsa-01b",
+      "mgmt_ip": "192.168.210.22",
+      "origin_type": "vCenter",
+      "credential_type": "UsernamePasswordLoginCredential",
+      "username": "administrator@vsphere.local",
+      "password": "VMware1!"
+    }
+  ],
+
+
+
+  "transport_zones": [
+    {
+      "display_name": "OVERLAY-TZ",
+      "description": "NSX Configured Overlay Transport zone",
+      "transport_type": "OVERLAY",
+      "host_switch_name": "nvds",
+      "uplink_teaming_policy_names": [],
+    },
+    {
+      "display_name": "VLAN-EDGE-TZ",
+      "description": "NSX Configured VLAN Transport Zone for Edge Nodes at Site A",
+      "transport_type": "VLAN",
+      "host_switch_name": "nvds",
+      "uplink_teaming_policy_names": [ "uplink-1-only" , "uplink-2-only" ]
+    }   
+  ],
+
+ 
+  "ip_pools": [
+    {
+      "display_name": "TEP-ESX-IP-POOL",
+      "subnets": [
+        {
+          "allocation_ranges": [
+            {
+              "start": "192.168.230.51",
+              "end": "192.168.230.91"
+            }
+          ],
+          "gateway_ip": "192.168.230.1",
+          "cidr": "192.168.230.0/24"
+        }
+      ]
+    }
+    ,
+    {
+      "display_name": "TEP-EDGES-IP-POOL",
+      "subnets": [
+        {
+          "allocation_ranges": [
+            {
+              "start": "192.168.231.51",
+              "end": "192.168.231.91"
+            }
+          ],
+          "gateway_ip": "192.168.231.1",
+          "cidr": "192.168.231.0/24"
+        }
+      ]
+    }
+  ],
+
+
+   "uplink_profiles": [
+    {
+      "display_name": "edge-uplink-profile",
+      "teaming": {
+        "active_list": [
+          {
+            "uplink_name": "uplink-1",
+            "uplink_type": "PNIC"
+          },
+          {
+            "uplink_name": "uplink-2",
+            "uplink_type": "PNIC"
+          }
+        ],
+        "policy": "LOADBALANCE_SRCID"
+      },
+      "named_teamings" : [
+        {
+          "name": "uplink-1-only",
+          "active_list": [
+            {
+              "uplink_name": "uplink-1",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        },
+        {
+          "name": "uplink-2-only",
+          "active_list": [
+            {
+              "uplink_name": "uplink-2",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        }
+      ],
+      "transport_vlan": 231,
+    },
+
+    {
+      "display_name": "esxi-uplink-profile",
+      "teaming": {
+        "active_list": [
+          {
+            "uplink_name": "uplink-1",
+            "uplink_type": "PNIC"
+          },
+          {
+            "uplink_name": "uplink-2",
+            "uplink_type": "PNIC"
+          }
+        ],
+        "policy": "LOADBALANCE_SRCID"
+      },
+      "named_teamings" : [
+        {
+          "name": "uplink-1-only",
+          "active_list": [
+            {
+              "uplink_name": "uplink-1",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        },
+        {
+          "name": "uplink-2-only",
+          "active_list": [
+            {
+              "uplink_name": "uplink-2",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        },
+        {
+          "name": "uplink-1-active-uplink-2-standby",
+          "active_list": [
+            {
+              "uplink_name": "uplink-1",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "standby_list": [
+            {
+              "uplink_name": "uplink-2",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        },
+        {
+          "name": "uplink-2-active-uplink-1-standby",
+          "active_list": [
+            {
+              "uplink_name": "uplink-2",
+              "uplink_type": "PNIC"
+            },
+            {
+              "uplink_name": "uplink-1",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "standby_list": [
+          ],
+          "policy": "LOADBALANCE_SRCID"
+        }
+      ],
+      "transport_vlan": 0
+    }
+  ],
+    
+
+  "transport_node_profiles": [
+    {
+      "display_name": "esxi-tn-profile",
+      "description": "Compute Transport Node Profile",
+      "host_switches": [
+        {
+          "host_switch_profiles": [
+            {
+              "name": "esxi-uplink-profile",
+              "type": "UplinkHostSwitchProfile"
+            }
+          ],
+          "host_switch_name": "SiteB-vDS-01",
+          "host_switch_type": "VDS",
+          "host_switch_mode": "STANDARD",
+          "uplinks" : [ {
+            "vds_uplink_name" : "Uplink 1",
+            "uplink_name" : "uplink-1"
+          }, {
+            "vds_uplink_name" : "Uplink 2",
+            "uplink_name" : "uplink-2"
+          } ],
+          "transport_zone_endpoints": [
+            {
+              "transport_zone_name": "OVERLAY-TZ"
+            }
+          ],
+          "ip_assignment_spec":
+            {
+              "resource_type": "StaticIpPoolSpec",
+              "ip_pool_name": "TEP-ESX-IP-POOL"
+            }
+        }
+      ]
+    }
+  ],
+
+
+  "edge_transport_nodes": [
+    {
+      "display_name": "edge-01b",
+      "description": "NSX Edge Node 01b",
+      "host_switches": [
+        {
+          "host_switch_profiles": [
+            {
+              "name": "edge-uplink-profile",
+              "type": "UplinkHostSwitchProfile"
+            },
+            {
+              "name": "LLDP [Send Packet Disabled]",
+              "type": "LldpHostSwitchProfile"
+            }
+          ],
+          "host_switch_name": "nvds",
+          "pnics": [
+            {
+              "device_name": "fp-eth0",
+              "uplink_name": "uplink-1"
+            },
+            {
+              "device_name": "fp-eth1",
+              "uplink_name": "uplink-2"
+            }
+          ],
+          "ip_assignment_spec":
+            {
+              "resource_type": "StaticIpPoolSpec",
+              "ip_pool_name": "TEP-EDGES-IP-POOL"
+            }
+        }
+      ],
+      "transport_zone_endpoints": [
+        {
+          "transport_zone_name": "OVERLAY-TZ"
+        },
+        {
+          "transport_zone_name": "VLAN-EDGE-TZ"
+        }
+      ],
+      "node_deployment_info": {
+        "deployment_type": "VIRTUAL_MACHINE",
+        "deployment_config": {
+          "vm_deployment_config": {
+            "vc_name": "vcsa-01b",
+            "compute_id": "domain-c8",
+            "storage_id": "datastore-31",
+            "host_id": "host-30",
+            "management_network_id": "dvportgroup-20",
+            "hostname": "edgenode-01b.corp.local",
+            "data_network_ids": [
+              "dvportgroup-2005",
+              "dvportgroup-2006",
+              "dvportgroup-20"
+            ],
+            "management_port_subnets": [
+              {
+                "ip_addresses": [ "192.168.210.19" ],
+                "prefix_length": 24
+              }
+            ],
+            "default_gateway_addresses": [ "192.168.210.1" ],
+            "allow_ssh_root_login": true,
+            "enable_ssh": true,
+            "placement_type": "VsphereDeploymentConfig"
+          },
+          "form_factor": "SMALL",
+          "node_user_settings": {
+            "cli_username": "admin" ,
+            "root_password": "VMware1!VMware1!",
+            "cli_password": "VMware1!VMware1!",
+            "audit_username": "audit",
+            "audit_password": "VMware1!VMware1!"
+          }
+        },
+        "resource_type": "EdgeNode",
+        "display_name": "edge-01b"
+      },
+    },
+    {
+      "display_name": "edge-02b",
+      "description": "NSX Edge Node 02b",
+      "host_switches": [
+        {
+          "host_switch_profiles": [
+            {
+              "name": "edge-uplink-profile",
+              "type": "UplinkHostSwitchProfile"
+            },
+            {
+              "name": "LLDP [Send Packet Disabled]",
+              "type": "LldpHostSwitchProfile"
+            }
+          ],
+          "host_switch_name": "nvds",
+          "pnics": [
+            {
+              "device_name": "fp-eth0",
+              "uplink_name": "uplink-1"
+            },
+            {
+              "device_name": "fp-eth1",
+              "uplink_name": "uplink-2"
+            }
+          ],
+          "ip_assignment_spec":
+            {
+              "resource_type": "StaticIpPoolSpec",
+              "ip_pool_name": "TEP-EDGES-IP-POOL"
+            }
+        }
+      ],
+      "transport_zone_endpoints": [
+        {
+          "transport_zone_name": "OVERLAY-TZ"
+        },
+        {
+        "transport_zone_name": "VLAN-EDGE-TZ"
+        }
+      ],
+      "node_deployment_info": {
+        "deployment_type": "VIRTUAL_MACHINE",
+        "deployment_config": {
+          "vm_deployment_config": {
+            "vc_name": "vcsa-01b",
+            "compute_id": "domain-c8",
+            "storage_id": "datastore-27",
+            "host_id": "host-16",
+            "management_network_id": "dvportgroup-20",
+            "hostname": "edgenode-01b.corp.local",
+            "data_network_ids": [
+              "dvportgroup-2005",
+              "dvportgroup-2006",
+              "dvportgroup-20"
+            ],
+            "management_port_subnets": [
+              {
+                "ip_addresses": [ "192.168.210.20" ],
+                "prefix_length": 24
+              }
+            ],
+            "default_gateway_addresses": [ "192.168.210.1" ],
+            "allow_ssh_root_login": true,
+            "enable_ssh": true,
+            "placement_type": "VsphereDeploymentConfig"
+          },
+          "form_factor": "SMALL",
+          "node_user_settings": {
+            "cli_username": "admin" ,
+            "root_password": "VMware1!VMware1!",
+            "cli_password": "VMware1!VMware1!",
+            "audit_username": "audit",
+            "audit_password": "VMware1!VMware1!"
+          }
+        },
+        "resource_type": "EdgeNode",
+        "display_name": "edge-02b"
+      },
+    }
+
+  ],
+
+
+  "edge_clusters": [
+    {
+      "display_name": "edge-cluster-01",
+      "cluster_profile_binding_id": "91bcaa06-47a1-11e4-8316-17ffc770799b",
+      "members": [
+        {
+          "transport_node_name": "edge-01b"
+        },
+        {
+          "transport_node_name": "edge-02b"
+        }
+      ]
+    }
+  ]
+}
